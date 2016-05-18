@@ -1,0 +1,103 @@
+
+该文档主要概述擦肩IM述协议格式内容
+
+擦肩IM协议由二进制完成，协议主要包含以下两个部分
+1.header
+2.body
+
+下面分别介绍这两块的含义
+
+一、header
+任何IM报文里都有该字段，header由两部分构成
+*.必须字段，包含以下几个
+  1.id
+    该字段为消息的唯一标示
+  2.from
+    该字段表示消息的发送id
+  3.to
+    该字段表示接收消息的id
+
+*.可选字段
+  4.senderName
+    发送者的名称
+  5.msg_type
+    消息的类型
+  6.msg_time
+    消息的时间
+  7.msg_version
+    协议的版本
+  8.msg_ask
+    该消息是否需要返回确认报文
+ 
+
+二、body
+body的含义比较类似于http，该类型默认就是字符串，具体类型由header里的msg_type决定
+
+
+三、格式详情
+  *).登录
+  请求字段如下
+    1.uid
+      用户id
+    2.token 
+      http登录成功返回的值
+  返回字段如下
+    1.resultCode
+      登录结果码
+    2.resultMsg
+      登录结果详细信息
+    2.date
+      服务器和当前用户设备的时间差（只有登录成功的情况下，才会返回）
+
+    {
+        "result_code": -1,
+        "result_msg": "token is null",
+        "date": "4343434343"
+    }
+
+  登录判断条件
+  1.每次登录，会记录下登录时间（服务器时间），如果该时间距离上次登录时间过长（该服务端时间可以设置），返回登录过期错误码，需要重新登录，并且把token（IM服务器记录）值清空，date值不返回
+  2.如果发送的token为空或者与服务器里的token值不一样，那么返回登录失败
+
+
+  *).发送消息
+  请求字段如下，3和4是可选部分，这个根据具体业务需要，可以适当存放，这些字段存放到header里
+  1.fromUid
+    发送者uid
+  2.toUid
+    接收者uid
+  3.senderName（可选）
+  4.senderIconUrl (可选)
+  5.msgTime （可选）
+  5.body 
+    消息内容
+
+  *).客户端和服务端相互给的消息确认报文
+  1.msgType
+    值为ack，标示该消息是确认报文
+  2.msgId
+    消息的id，标示那条消息是确认报文
+
+  *).心跳消息报文
+  1.msgType
+    值为心跳包
+  2.msgContent
+    值1代表主动发起ping的心跳消息，值2代表回ping的心跳消息
+  
+  *).添加好友
+    发起请求,包含字段如下
+      1.senderUid
+      2.senderName
+      3.senderIconUrl
+      4.msgType （int值，添加好友请求的类型）
+      5.requestBody
+        具体的业务信息可以放在requestBody里，通过json格式灵活组合，例如可以包含想说的话，
+      添加好友的原因等等
+  
+    接受请求
+      1.agreeUid
+      2.agreeName
+      3.agreeIconUrl
+      4.msgType (int值，通过好友请求的类型)
+      5.agreeBody
+	类似上面，存放业务逻辑的数据，包含同意原因等等

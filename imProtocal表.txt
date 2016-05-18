@@ -1,0 +1,14 @@
+1、登录
+  login 表
+  1._id 2.uid 3.token 4.tokentime 5.interval(-1表示失效,默认token有效期为10天)  
+
+2、发送消息和确认消息  
+  message表
+  1._id 2.msgid 3.msgstatus(1:发送到客户端，但没有收到确认，2:已发送到客户端收到确认) 
+  4.msgtype（消息类型）  5.msgsender（消息发送者） 6.msgreceiver （消息接收者）
+
+3、添加好友和同意好友
+  同上，和消息表一样，msgtype类型为添加好友或者同意好友  
+
+4、具体消息存在leveldb中
+  key为msgid, value为消息序列化值
